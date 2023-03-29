@@ -15,6 +15,7 @@
 package scorecard
 
 import (
+	log "github.com/sirupsen/logrus"
 	"os"
 
 	"github.com/operator-framework/operator-sdk/internal/util/k8sutil"
@@ -63,6 +64,8 @@ func GetKubeClient(kubeconfig string) (client kubernetes.Interface, config *rest
 //   - returns 'default' as the namespace if not set in the kubeconfig
 // TODO(joelanford): migrate scorecard to use `internal/operator.Configuration`
 func GetKubeNamespace(kubeconfigPath, namespace string) string {
+	log.Debugf("Getting kube namespace from config %q, ns flag %q, env var %q",
+		kubeconfigPath, namespace, os.Getenv(clientcmd.RecommendedConfigPathEnvVar))
 
 	if namespace != "" {
 		return namespace
@@ -77,6 +80,7 @@ func GetKubeNamespace(kubeconfigPath, namespace string) string {
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
 
 	ns, _, err := kubeConfig.Namespace()
+	log.Debugf("ns %q, error %q", ns, err)
 	if err != nil {
 		return "default"
 	}
